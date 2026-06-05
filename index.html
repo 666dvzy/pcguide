@@ -945,6 +945,241 @@
   <span>PCGuide.cl</span> — Proyecto Design Thinking · UTEM 2024 · Ingeniería en Computación
 </footer>
 
+<!-- CHATBOT -->
+<style>
+  #chat-bubble {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 52px;
+    height: 52px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 0 0 0 rgba(0,212,255,0.4);
+    animation: pulse-chat 2s infinite;
+    transition: transform 0.2s;
+  }
+  #chat-bubble:hover { transform: scale(1.1); }
+  #chat-bubble svg { width: 24px; height: 24px; fill: var(--bg); }
+
+  @keyframes pulse-chat {
+    0% { box-shadow: 0 0 0 0 rgba(0,212,255,0.4); }
+    70% { box-shadow: 0 0 0 12px rgba(0,212,255,0); }
+    100% { box-shadow: 0 0 0 0 rgba(0,212,255,0); }
+  }
+
+  #chat-window {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 1.5rem;
+    width: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    z-index: 998;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: slideUp 0.25s ease;
+  }
+
+  #chat-window.open { display: flex; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-header {
+    background: var(--surface2);
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .chat-header-left { display: flex; align-items: center; gap: 0.6rem; }
+
+  .chat-avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .chat-header h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .chat-header span {
+    font-size: 0.65rem;
+    color: var(--accent2);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .chat-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0.2rem;
+    transition: color 0.2s;
+  }
+  .chat-close:hover { color: var(--text); }
+
+  #chat-messages {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 320px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+  }
+
+  #chat-messages::-webkit-scrollbar { width: 4px; }
+  #chat-messages::-webkit-scrollbar-track { background: transparent; }
+  #chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg {
+    max-width: 85%;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    animation: fadeMsg 0.2s ease;
+  }
+
+  @keyframes fadeMsg {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.bot {
+    background: var(--surface2);
+    color: var(--text);
+    border-bottom-left-radius: 2px;
+    align-self: flex-start;
+    border: 1px solid var(--border);
+  }
+
+  .msg.user {
+    background: var(--accent);
+    color: var(--bg);
+    border-bottom-right-radius: 2px;
+    align-self: flex-end;
+    font-weight: 600;
+  }
+
+  .chat-options {
+    padding: 0.5rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .chat-opt-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+
+  .chat-opt-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.05);
+  }
+
+  .chat-restart {
+    margin: 0 1rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.45rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-family: 'Space Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+  }
+  .chat-restart:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .typing {
+    display: flex;
+    gap: 4px;
+    padding: 0.6rem 0.9rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    border-bottom-left-radius: 2px;
+    align-self: flex-start;
+    width: fit-content;
+  }
+
+  .typing span {
+    width: 6px;
+    height: 6px;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: typing-dot 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing-dot {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+</style>
+
+<!-- Botón flotante -->
+<div id="chat-bubble" onclick="toggleChat()">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C6.48 2 2 6.03 2 11c0 2.67 1.19 5.07 3.09 6.77L4 22l4.5-1.5C9.6 20.83 10.78 21 12 21c5.52 0 10-4.03 10-9S17.52 2 12 2zm-1 13H7v-2h4v2zm6 0h-4v-2h4v2zm0-4H7V9h10v2z"/>
+  </svg>
+</div>
+
+<!-- Ventana del chat -->
+<div id="chat-window">
+  <div class="chat-header">
+    <div class="chat-header-left">
+      <div class="chat-avatar">P</div>
+      <div>
+        <h4>PCGuide Asistente</h4>
+        <span>● en línea</span>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div id="chat-messages"></div>
+  <div class="chat-options" id="chat-options"></div>
+</div>
+
 <script>
   function showPage(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -952,6 +1187,207 @@
     document.getElementById('page-' + id).classList.add('active');
     document.getElementById('nav-' + id).classList.add('active');
     window.scrollTo(0, 0);
+  }
+
+  // ── CHATBOT ──────────────────────────────────────────────
+  const flow = {
+    start: {
+      bot: '¡Hola! 👋 Soy el asistente de PCGuide. ¿Para qué vas a usar tu PC?',
+      options: [
+        { label: '🎮 Gaming', next: 'gaming' },
+        { label: '📚 Estudios / Trabajo', next: 'estudios' },
+        { label: '🎨 Diseño / Edición', next: 'diseno' },
+        { label: '💻 Uso general', next: 'general' },
+      ]
+    },
+    gaming: {
+      bot: '¡Buena elección! ¿Cuál es tu presupuesto aproximado?',
+      options: [
+        { label: '💸 Menos de $400.000 CLP', next: 'gaming_low' },
+        { label: '💰 $400.000 – $800.000 CLP', next: 'gaming_mid' },
+        { label: '🤑 Más de $800.000 CLP', next: 'gaming_high' },
+      ]
+    },
+    gaming_low: {
+      bot: 'Para gaming con presupuesto ajustado te recomiendo:\n\n🔲 CPU: Ryzen 5 5600 (~$89.990)\n🎮 GPU: RX 6600 (~$179.990)\n💾 RAM: 16GB DDR4 (~$35.990)\n\nTotal estimado: ~$305.970',
+      options: [
+        { label: '🔍 Ver compatibilidad de estos componentes', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    gaming_mid: {
+      bot: 'Con ese presupuesto podés armar algo muy sólido:\n\n🔲 CPU: Ryzen 5 7600X (~$189.990)\n🎮 GPU: RTX 4060 Ti (~$349.990)\n💾 RAM: 32GB DDR5 (~$79.990)\n\nTotal estimado: ~$619.970',
+      options: [
+        { label: '🔍 Ver compatibilidad de estos componentes', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    gaming_high: {
+      bot: 'Con ese presupuesto vas a tener una bestia:\n\n🔲 CPU: Ryzen 9 7900X (~$389.990)\n🎮 GPU: RTX 4080 Super (~$899.990)\n💾 RAM: 32GB DDR5 6000MHz (~$119.990)\n\nTotal estimado: ~$1.409.970',
+      options: [
+        { label: '🔍 Ver compatibilidad de estos componentes', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    estudios: {
+      bot: '¿Qué tipo de tareas vas a hacer principalmente?',
+      options: [
+        { label: '📝 Documentos, navegación, Office', next: 'estudios_basic' },
+        { label: '💻 Programación / Desarrollo', next: 'estudios_dev' },
+        { label: '📊 Análisis de datos / Machine Learning', next: 'estudios_ml' },
+      ]
+    },
+    estudios_basic: {
+      bot: 'Para tareas básicas no necesitás gastar mucho:\n\n🔲 CPU: Intel Core i3-12100 (~$79.990)\n💾 RAM: 16GB DDR4 (~$35.990)\n💽 SSD: 512GB (~$34.990)\n\nTotal estimado: ~$150.970',
+      options: [
+        { label: '🔍 Ver compatibilidad', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    estudios_dev: {
+      bot: 'Para programación se necesita buena RAM y CPU:\n\n🔲 CPU: Ryzen 5 7600X (~$189.990)\n💾 RAM: 32GB DDR5 (~$79.990)\n💽 SSD NVMe: 1TB (~$54.990)\n\nTotal estimado: ~$324.970',
+      options: [
+        { label: '🔍 Ver compatibilidad', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    estudios_ml: {
+      bot: 'Para ML / Data Science necesitás potencia real:\n\n🔲 CPU: Ryzen 9 7900X (~$389.990)\n🎮 GPU: RTX 4070 (~$549.990)\n💾 RAM: 64GB DDR5 (~$189.990)\n\nTotal estimado: ~$1.129.970',
+      options: [
+        { label: '🔍 Ver compatibilidad', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    diseno: {
+      bot: '¿Qué tipo de diseño o edición vas a hacer?',
+      options: [
+        { label: '🖼️ Diseño gráfico (Photoshop, Illustrator)', next: 'diseno_grafico' },
+        { label: '🎬 Edición de video (Premiere, DaVinci)', next: 'diseno_video' },
+        { label: '🎵 Producción musical (DAW)', next: 'diseno_audio' },
+      ]
+    },
+    diseno_grafico: {
+      bot: 'Para diseño gráfico la clave es buena pantalla y RAM:\n\n🔲 CPU: Ryzen 5 7600X (~$189.990)\n💾 RAM: 32GB DDR5 (~$79.990)\n🎮 GPU: RTX 4060 (~$249.990)\n\nTotal estimado: ~$519.970',
+      options: [
+        { label: '🔍 Ver compatibilidad', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    diseno_video: {
+      bot: 'Edición de video necesita GPU potente y mucho almacenamiento:\n\n🔲 CPU: Ryzen 7 7700X (~$279.990)\n🎮 GPU: RTX 4070 Ti (~$699.990)\n💾 RAM: 32GB DDR5 (~$79.990)\n💽 SSD: 2TB NVMe (~$89.990)\n\nTotal estimado: ~$1.149.960',
+      options: [
+        { label: '🔍 Ver compatibilidad', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    diseno_audio: {
+      bot: 'Para producción musical lo más importante es CPU rápido y RAM:\n\n🔲 CPU: Intel i5-13600K (~$199.990)\n💾 RAM: 32GB DDR5 (~$79.990)\n💽 SSD NVMe: 1TB (~$54.990)\n\nTotal estimado: ~$334.970',
+      options: [
+        { label: '🔍 Ver compatibilidad', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    general: {
+      bot: '¿Cuánto querés gastar aproximadamente?',
+      options: [
+        { label: '💸 Menos de $200.000 CLP', next: 'general_low' },
+        { label: '💰 $200.000 – $500.000 CLP', next: 'general_mid' },
+      ]
+    },
+    general_low: {
+      bot: 'Para uso general con presupuesto bajo:\n\n🔲 CPU: Intel Core i3-12100 (~$79.990)\n💾 RAM: 8GB DDR4 (~$19.990)\n💽 SSD: 480GB (~$29.990)\n\nTotal estimado: ~$129.970',
+      options: [
+        { label: '🔍 Ver compatibilidad', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    general_mid: {
+      bot: 'Con ese rango tenés buenas opciones:\n\n🔲 CPU: Ryzen 5 5600 (~$89.990)\n💾 RAM: 16GB DDR4 (~$35.990)\n🎮 GPU: RX 6600 (~$179.990)\n💽 SSD: 1TB (~$44.990)\n\nTotal estimado: ~$350.960',
+      options: [
+        { label: '🔍 Ver compatibilidad', next: 'ver_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    ver_compat: {
+      bot: '¡Perfecto! Te llevo a la sección de compatibilidad donde podés verificar que todos los componentes funcionen juntos. 🔧',
+      options: [
+        { label: '→ Ir a Compatibilidad', next: 'goto_compat' },
+        { label: '↩ Volver al inicio', next: 'start' },
+      ]
+    },
+    goto_compat: null
+  };
+
+  let chatOpen = false;
+  let started = false;
+
+  function toggleChat() {
+    chatOpen = !chatOpen;
+    const win = document.getElementById('chat-window');
+    win.classList.toggle('open', chatOpen);
+    if (chatOpen && !started) {
+      started = true;
+      setTimeout(() => showStep('start'), 300);
+    }
+  }
+
+  function addMsg(text, type) {
+    const msgs = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = 'msg ' + type;
+    div.style.whiteSpace = 'pre-line';
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping(cb) {
+    const msgs = document.getElementById('chat-messages');
+    const t = document.createElement('div');
+    t.className = 'typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    t.id = 'typing-indicator';
+    msgs.appendChild(t);
+    msgs.scrollTop = msgs.scrollHeight;
+    setTimeout(() => {
+      t.remove();
+      cb();
+    }, 800);
+  }
+
+  function showStep(key) {
+    if (key === 'goto_compat') {
+      showPage('compat');
+      toggleChat();
+      return;
+    }
+    const step = flow[key];
+    if (!step) return;
+    const opts = document.getElementById('chat-options');
+    opts.innerHTML = '';
+    showTyping(() => {
+      addMsg(step.bot, 'bot');
+      step.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'chat-opt-btn';
+        btn.textContent = opt.label;
+        btn.onclick = () => {
+          addMsg(opt.label, 'user');
+          opts.innerHTML = '';
+          setTimeout(() => showStep(opt.next), 300);
+        };
+        opts.appendChild(btn);
+      });
+      const restart = document.createElement('button');
+      restart.className = 'chat-restart';
+      restart.textContent = '↺ reiniciar consulta';
+      restart.onclick = () => {
+        document.getElementById('chat-messages').innerHTML = '';
+        opts.innerHTML = '';
+        setTimeout(() => showStep('start'), 200);
+      };
+      opts.appendChild(restart);
+    });
   }
 </script>
 </body>
